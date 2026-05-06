@@ -1,0 +1,88 @@
+GameReader/
+│
+├── main.py
+│
+├── core/
+│   ├── __init__.py
+│   ├── app.py
+│   ├── state.py
+│   ├── validation.py
+│   ├── resolution_scaling.py
+│   ├── debug.py
+│   ├── constants.py
+│   └── paths.py
+│
+├── audio/
+│   ├── __init__.py
+│   ├── player.py
+│   ├── speed.py
+│   └── volume.py
+│
+├── ocr/
+│   ├── __init__.py
+│   ├── capture.py
+│   ├── parallel.py
+│   └── filters.py
+│
+├── presets/
+│   ├── __init__.py
+│   ├── schema.py
+│   └── manager.py
+│
+├── input/
+│   ├── __init__.py
+│   └── hotkeys.py
+│
+├── ui/
+│   ├── __init__.py
+│   │
+│   ├── main_window.py
+│   ├── debug_window.py
+│   │
+│   ├── tabs/
+│   │   ├── __init__.py
+│   │   ├── start_tab.py
+│   │   ├── files_tab.py
+│   │   ├── screen_tab.py
+│   │   ├── shortcuts_tab.py
+│   │   ├── advanced_tab.py
+│   │   └── about_tab.py
+│   │
+│   ├── overlay/
+│   │   ├── debug_overlay.py
+│   │   ├── hotkeys_overlay.py
+│   │   └── screen_area_selector.py
+│   │
+│   ├── widgets.py
+│   ├── tooltips.py
+│   ├── keymap.py
+│   │
+│   └── theme/
+│       ├── __init__.py
+│       ├── theme.py
+│       └── global_qss.py
+│
+├── assets/
+│   ├── images/
+│   │   ├── start-logo.psd
+│   │   ├── logo.png
+│   │   ├── logo2.png
+│   │   └── logo-small.png
+│   └── fonts/
+│       ├── Nunito-Regular.ttf
+│       ├── Nunito-SemiBold.ttf
+│       └── Nunito-Bold.ttf
+│
+└── resources/
+    ├── icon.ico
+    ├── sounds/
+    │   ├── on.ogg
+    │   ├── off.ogg
+    │   ├── area1.ogg
+    │   ├── area2.ogg
+    │   ├── ping.ogg
+    │   ├── announcement.ogg
+    │   └── test.ogg
+    └── bin/
+        ├── ffmpeg.exe
+        └── ffprobe.exe
