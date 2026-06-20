@@ -1,0 +1,75 @@
+[package]
+name = "gamereader"
+version = "0.1.0"
+description = "GameReader - High-performance game subtitle reader with OCR"
+authors = ["drift"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "gamereader_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+thiserror = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "time"] }
+tracing-appender = "0.2"
+chrono = "0.4"
+parking_lot = "0.12"
+rodio = { version = "0.19", default-features = false, features = ["symphonia-all"] }
+# rodio's "symphonia-all" pulls the Vorbis *codec* but not the OGG *container*
+# reader, so .ogg files fail to decode ("end of stream"). Declaring symphonia
+# directly with the "ogg" format feature unifies features across the graph so
+# rodio's symphonia also gets the OGG demuxer.
+symphonia = { version = "0.5.5", default-features = false, features = ["ogg", "vorbis"] }
+image = "0.25"
+xcap = "0.0.12"
+# Windows Graphics Capture (WGC) for window/app capture that works in
+# fullscreen (flip-model). Enumerates windows + captures by HWND/process name.
+windows-capture = "2.0.0"
+# Fast fuzzy matching (same Indel-ratio algorithm as Python's rapidfuzz).
+# Replaces the naive Levenshtein scan so matching ~17k dialogue lines stays fast.
+rapidfuzz = "0.5"
+
+# OCR engine - rust-paddle-ocr with MNN backend
+ocr-rs = { git = "https://github.com/zibo-chen/rust-paddle-ocr.git", branch = "next" }
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_System_Threading",
+    "Win32_System_LibraryLoader",
+    "Win32_Security",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_System_Com",
+    "Win32_Media_Audio",
+    # For DXGI capture
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Graphics_Direct3D11",
+    "Win32_Graphics_Direct3D",
+    # For WGC capture
+    "Win32_Graphics_Gdi",
+    "Win32_Graphics_Dwm",
+    "Win32_System_WinRT",
+    "Win32_System_WinRT_Graphics_Capture",
+] }
+
+# Note: rust-paddle-ocr will be added when implementing the concrete OCR engine
+# For now, we define the trait and types without a specific implementation
+
+[dev-dependencies]
+tempfile = "3"
+

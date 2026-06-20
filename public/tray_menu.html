@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameReader Menu</title>
+  <link rel="stylesheet" href="/app.css">
+  <script>(function(){try{var t=localStorage.getItem('gr-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--surface);
+      overflow: hidden;
+      font-family: var(--font);
+      user-select: none;
+    }
+    body {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .tray-menu {
+      width: 100%;
+      background: var(--surface);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tray-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: none;
+      background: none;
+      color: var(--tx2);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--tf);
+      border-radius: var(--r-sm);
+      text-align: left;
+    }
+    .tray-item:hover {
+      background: var(--surface2);
+      color: var(--tx);
+    }
+    .tray-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .tray-preset {
+      padding: 12px 16px;
+      background: var(--surface2);
+      border-radius: var(--r-sm);
+      border: 1px solid var(--line);
+    }
+    .tray-preset-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--tx3);
+      margin-bottom: 4px;
+    }
+    .tray-preset-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--p);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tray-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 4px 0;
+    }
+    .tray-quit {
+      padding: 12px;
+      border: none;
+      border-radius: var(--r-sm);
+      background: var(--surface2);
+      color: var(--err);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--tf);
+      text-align: center;
+    }
+    .tray-quit:hover {
+      background: var(--err);
+      color: white;
+    }
+    .tray-quit.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="tray-menu">
+    <div class="tray-preset">
+      <div class="tray-preset-label">Aktywny preset</div>
+      <div class="tray-preset-value" id="preset-name">--</div>
+    </div>
+
+    <button class="tray-item" onclick="wywolajZdarzenie('pokaz_ustawienia')">
+      <svg class="tray-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Ustawienia</span>
+    </button>
+
+    <button class="tray-item" onclick="wywolajZdarzenie('konsola_debug')">
+      <svg class="tray-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      <span>Konsola debug</span>
+    </button>
+
+    <button class="tray-item" id="reader-toggle-btn" onclick="wywolajZdarzenie('toggle_lektor')">
+      <svg class="tray-icon" id="reader-toggle-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span id="reader-toggle-text">Włącz lektora</span>
+    </button>
+
+    <div class="tray-divider"></div>
+
+    <button class="tray-quit" onclick="wywolajZdarzenie('zamknij_aplikacje')">
+      Wyłącz GameReader
+    </button>
+  </div>
+
+  <script>
+    const invoke = window.__TAURI__.core.invoke;
+    const listen = window.__TAURI__.event.listen;
+
+    function wywolajZdarzenie(akcja) {
+      console.log("Wywołano akcję z traya:", akcja);
+      invoke('tray_action', { action: akcja })
+        .then(() => console.log("Akcja wykonana:", akcja))
+        .catch(e => console.error("Błąd akcji:", e));
+    }
+
+    async function loadPreset() {
+      const el = document.getElementById('preset-name');
+      if (!el) return;
+      el.textContent = '...';
+      try {
+        const name = await invoke('get_current_preset');
+        el.textContent = name || 'Brak presetu';
+      } catch (e) {
+        console.error('Błąd pobierania presetu:', e);
+        el.textContent = 'Błąd: ' + (e.message || e);
+      }
+    }
+
+    function updateReaderState(enabled) {
+      const btn = document.getElementById('reader-toggle-btn');
+      const icon = document.getElementById('reader-toggle-icon');
+      const text = document.getElementById('reader-toggle-text');
+      
+      if (enabled) {
+        text.textContent = 'Wyłącz lektora';
+        icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      } else {
+        text.textContent = 'Włącz lektora';
+        icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+      }
+    }
+
+    async function init() {
+      await loadPreset();
+      
+      listen('refresh_preset', () => {
+        loadPreset();
+      });
+      
+      listen('reader_state', (event) => {
+        updateReaderState(event.payload.enabled);
+      });
+      
+      listen('preset_loaded', (event) => {
+        const el = document.getElementById('preset-name');
+        if (el && event.payload.name) {
+          el.textContent = event.payload.name;
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+﻿<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameReader</title>
+  <link rel="stylesheet" href="/app.css?v=14" />
+  <script>(function(){try{var t=localStorage.getItem('gr-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+  <script type="module" src="/src/main.ts" defer></script>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <img src="/logo.png" alt="GameReader" class="sidebar-logo" />
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" data-tab="quickstart">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span>Start</span>
+    </button>
+    <button class="nav-item" data-tab="hotkeys">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+      <span>Skroty</span>
+    </button>
+    <button class="nav-item" data-tab="files">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <span>Pliki</span>
+    </button>
+    <button class="nav-item" data-tab="settings">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Ustawienia</span>
+    </button>
+    <button class="nav-item" data-tab="about">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>O programie</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <button id="enable-reader-btn" class="run-btn-sidebar">
+      <svg class="run-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>URUCHOM</span>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+<div class="tb" data-tauri-drag-region>
+  <span class="tb-title" data-tauri-drag-region></span>
+  <div class="tb-btns">
+    <button id="theme-toggle" class="tb-btn tb-theme" type="button">
+      <svg id="theme-toggle-icon" class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button id="win-min" class="tb-btn" title="Zwin do zasobnika">
+      <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <button id="win-max" class="tb-btn">
+      <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+    </button>
+    <button id="win-close" class="tb-btn tb-close">
+      <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <img src="/name.png" alt="GameReader" class="header-title-img" />
+
+  </div>
+</div>
+
+<div class="content">
+
+<div class="tab-content active" data-tab-content="quickstart">
+  <div class="page-header"><h2>Szybki start</h2><p class="page-sub">Wczytaj preset, Wybierz okno gry, i nacisnij Uruchom.</p></div>
+  
+  <div class="summary-cards">
+    <div class="summary-card">
+      <h3>Status</h3>
+      <div class="value" id="status-card-value">Gotowy</div>
+      <div class="label">Stan czytnika</div>
+    </div>
+    <div class="summary-card">
+      <h3>Okno gry</h3>
+      <div class="value" id="window-card-value">--</div>
+      <div class="label" id="window-resolution-info">Rozdzielczość: --</div>
+    </div>
+    <div class="summary-card">
+      <h3>Preset</h3>
+      <div class="value" id="preset-card-value" style="font-size:20px">--</div>
+      <div class="label">Aktywny preset</div>
+    </div>
+  </div>
+  
+  <div class="quickstart-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div>
+      <div class="section-header"><h3>Presety</h3></div>
+      <div class="panel">
+        <div class="btn-row" style="margin:0 0 12px 0"><button id="load-preset-btn" class="btn">Wczytaj preset</button><button id="save-preset-btn" class="btn">Zapisz preset</button></div>
+        <div id="recent-presets" class="recent-presets-list"><p class="empty-state">Brak ostatnich presetow</p></div>
+      </div>
+    </div>
+    
+    <div>
+      <div class="section-header"><h3>Okno gry</h3></div>
+      <div class="panel">
+        <div class="field-row">
+          <label class="fl" for="capture-window-query">Okno gry</label>
+          <div class="fr">
+            <div class="row-g"><select id="capture-window-select"><option value="">-- wybierz okno --</option></select><button type="button" id="refresh-windows-btn" class="btn-icon"><svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button></div>
+            <input type="text" id="capture-window-query" placeholder="np. GTA-SA.exe lub fragment tytulu" />
+            <span class="err" id="capture-window-query-error"></span>
+            <span class="hint hi" id="active-window-info"></span>
+          </div>
+        </div>
+      </div>
+      
+      <div id="monitor-picker-card" style="display:none;">
+        <div class="section-header"><h3>Monitor</h3></div>
+        <div class="panel">
+          <div class="field-row"><label class="fl" for="capture-monitor">Monitor</label><div class="fr"><select id="capture-monitor"><option value="">Auto</option></select></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content" data-tab-content="hotkeys">
+  <div class="page-header"><h2>Skroty klawiszowe</h2><p class="page-sub">Kliknij skrot, aby go zmienic.</p></div>
+  <div class="section-header"><h3>Przypisane skroty</h3></div>
+  <div class="panel">
+    <div id="hotkeys-grid" class="hotkeys-grid"></div>
+    <span class="err" id="hotkeys-error"></span>
+  </div>
+</div>
+
+<div class="tab-content" data-tab-content="files">
+  <div class="page-header"><h2>Foldery i pliki</h2><p class="page-sub">Sciezki do zasobow czytnika.</p></div>
+  <div class="section-header"><h3>Sciezki</h3></div>
+  <div class="panel">
+    <div class="field-row"><label class="fl" for="audio-dir">Folder audio</label><div class="fr"><div class="row-g"><input type="text" id="audio-dir" placeholder="Sciezka do folderu audio" /><button class="btn" data-picker="audio-dir">Wybierz</button></div><span class="err" id="audio-dir-error"></span></div></div>
+    <div class="field-row"><label class="fl" for="text-file">Plik dialogow</label><div class="fr"><div class="row-g"><input type="text" id="text-file" placeholder="Sciezka do pliku .txt" /><button class="btn" data-picker="text-file">Wybierz</button></div><span class="err" id="text-file-error"></span></div></div>
+    <div class="field-row"><label class="fl" for="names-file">Plik z imionami</label><div class="fr"><div class="row-g"><input type="text" id="names-file" placeholder="Opcjonalny plik z imionami" /><button class="btn" data-picker="names-file">Wybierz</button></div><span class="err" id="names-file-error"></span></div></div>
+    <div class="field-row last"><label class="fl" for="screenshot-dir">Folder zrzutow</label><div class="fr"><div class="row-g"><input type="text" id="screenshot-dir" placeholder="Folder zapisu zrzutow" /><button class="btn" data-picker="screenshot-dir">Wybierz</button></div></div></div>
+  </div>
+</div>
+
+<div class="tab-content" data-tab-content="settings">
+  <div class="page-header"><h2>Ustawienia</h2><p class="page-sub">Przechwytywanie, regiony, audio i opcje czytnika.</p></div>
+  
+  <div class="section-header"><h3>Przechwytywanie</h3></div>
+  <div class="panel">
+    <div class="field-row"><label class="fl" for="capture-interval">Interwal (s)</label><div class="fr"><div class="slider-with-value"><input type="range" id="capture-interval" min="0.1" max="5.0" value="1.0" step="0.1" /><span class="slider-value">1.0s</span></div><span class="err" id="capture-interval-error"></span></div></div>
+    <div class="field-row"><label class="fl" for="min-height">Min. wysokosc (px)</label><div class="fr"><input type="number" id="min-height" min="1" max="500" value="10" /><span class="err" id="min-height-error"></span></div></div>
+    <div class="field-row last"><label class="fl" for="max-height">Max. wysokosc (px)</label><div class="fr"><input type="number" id="max-height" min="1" max="500" value="100" /><span class="err" id="max-height-error"></span></div></div>
+  </div>
+  
+  <div class="section-header"><h3>Regiony OCR</h3></div>
+  <div class="panel">
+    <label class="sw-row"><span class="sw-label">Pokaz ramke obszaru</span><input type="checkbox" id="enable-region-overlay" class="sw" /></label>
+    <button type="button" id="select-region-btn" class="btn full" style="margin-bottom:8px">Zaznacz region 1</button>
+    <button type="button" id="toggle-manual-region1" class="btn full">Ustawisz ręczne</button>
+    <div id="manual-region1" style="display:none;margin-top:8px">
+      <div class="field-row"><label class="fl">Gora</label><div class="fr"><input type="number" id="monitor-top" value="0" style="width:100px" /></div></div>
+      <div class="field-row"><label class="fl">Lewo</label><div class="fr"><input type="number" id="monitor-left" value="0" style="width:100px" /></div></div>
+      <div class="field-row"><label class="fl">Szerokosc</label><div class="fr"><input type="number" id="monitor-width" value="1920" style="width:100px" /></div></div>
+      <div class="field-row last"><label class="fl">Wysokosc</label><div class="fr"><input type="number" id="monitor-height" value="1080" style="width:100px" /></div></div>
+    </div>
+  </div>
+  
+  <div class="panel">
+    <label class="sw-row"><span class="sw-label">Region 2</span><input type="checkbox" id="monitor2-enabled" class="sw" /></label>
+    <button type="button" id="select-region2-btn" class="btn full" style="margin-bottom:8px">Zaznacz region 2</button>
+    <button type="button" id="toggle-manual-region2" class="btn full">Ustawisz ręczne</button>
+    <div id="manual-region2" style="display:none;margin-top:8px">
+      <div class="field-row"><label class="fl">Gora</label><div class="fr"><input type="number" id="monitor2-top" value="0" style="width:100px" /></div></div>
+      <div class="field-row"><label class="fl">Lewo</label><div class="fr"><input type="number" id="monitor2-left" value="0" style="width:100px" /></div></div>
+      <div class="field-row"><label class="fl">Szerokosc</label><div class="fr"><input type="number" id="monitor2-width" value="1920" style="width:100px" /></div></div>
+      <div class="field-row last"><label class="fl">Wysokosc</label><div class="fr"><input type="number" id="monitor2-height" value="1080" style="width:100px" /></div></div>
+    </div>
+  </div>
+  
+  <div class="section-header"><h3>Filtry linii srodkowej</h3></div>
+  <div class="panel">
+    <label class="sw-row"><span class="sw-label">Linia 1</span><input type="checkbox" id="use-center-line-1" class="sw" /></label>
+    <label class="sw-row"><span class="sw-label">Linia 2</span><input type="checkbox" id="use-center-line-2" class="sw" /></label>
+    <div class="field-row"><label class="fl" for="center-line-2-start">Pozycja (px)</label><div class="fr"><input type="number" id="center-line-2-start" min="0" max="2000" value="600" /></div></div>
+    <label class="sw-row"><span class="sw-label">Linia 3</span><input type="checkbox" id="use-center-line-3" class="sw" /></label>
+    <div class="field-row"><label class="fl" for="center-line-3-ratio">Wspolczynnik</label><div class="fr"><div class="slider-with-value"><input type="range" id="center-line-3-ratio" min="0" max="1" value="0.5" step="0.05" /><span class="slider-value">0.5</span></div></div></div>
+    <div class="field-row last"><label class="fl" for="center-line-margin">Margines (px)</label><div class="fr"><input type="number" id="center-line-margin" min="0" max="200" value="50" /></div></div>
+  </div>
+  
+  <div class="section-header"><h3>Audio</h3></div>
+  <div class="panel">
+    <div class="field-row"><label class="fl" for="reader-volume">Glosnosc lektora</label><div class="fr"><div class="slider-with-value"><input type="range" id="reader-volume" min="0" max="100" value="100" step="5" /><span class="slider-value">100%</span></div></div></div>
+    <div class="field-row"><label class="fl" for="volume-reduction">Redukcja glosnosci gry</label><div class="fr"><div class="slider-with-value"><input type="range" id="volume-reduction" min="0" max="100" value="20" step="5" /><span class="slider-value">20%</span></div></div></div>
+    <div class="field-row"><div class="dual-slider"><div class="dual-slider-track"></div><div class="dual-slider-fill" id="speed-fill"></div><input type="range" id="playback-speed" min="0.5" max="2.0" value="1.0" step="0.01" /><input type="range" id="overlap-speed" min="0.5" max="2.0" value="1.05" step="0.01" /></div></div>
+    <div class="dual-slider-values"><span>Bazowa: <b id="base-speed-val">1.00x</b></span><span>Dogania: <b id="overlap-speed-val">1.05x</b></span></div>
+    <div class="field-row last" style="margin-top:16px"><label class="fl">Kolejka</label><div class="fr"><div class="radio-group"><label><input type="radio" name="queue-size" value="1" /><span>1</span></label><label><input type="radio" name="queue-size" value="2" checked /><span>2</span></label><label><input type="radio" name="queue-size" value="3" /><span>3</span></label></div></div></div>
+  </div>
+  
+  <div class="section-header"><h3>Opcje</h3></div>
+  <div class="panel">
+    <label class="sw-row"><span class="sw-label">Usun imiona postaci</span><input type="checkbox" id="enable-remove-character-name" class="sw" /></label>
+    <label class="sw-row"><span class="sw-label">Wlacz zrzuty ekranu</span><input type="checkbox" id="enable-screenshots" class="sw" /></label>
+    <label class="sw-row"><span class="sw-label">Tryb akapitowy OCR</span><input type="checkbox" id="enable-paragraph-ocr" class="sw" /></label>
+    <label class="sw-row"><span class="sw-label">Tryb pisania na maszynie</span><input type="checkbox" id="enable-typewriter-wait" class="sw" /></label>
+    <label class="sw-row last"><span class="sw-label">Zwijn do zasobnika gdy lektor dziala</span><input type="checkbox" id="minimize-to-tray" class="sw" checked /></label>
+  </div>
+</div>
+
+<div class="tab-content" data-tab-content="about">
+  <div class="page-header"><h2>O programie</h2></div>
+  <div class="about-wrap">
+    <img src="/logo-small.png" alt="GameReader" class="about-logo">
+    <div class="about-name">GameReader</div>
+    <div class="about-version">wersja 1.0 &middot; pre release</div>
+
+    <div class="panel about-panel">
+      <p class="about-text">
+        GameReader to nie tylko filmowe doświadczenie, ale także realne wsparcie dla osób z niepełnosprawnościami oraz osób starszych, dla których czytanie napisów dialogowych w grach stanowi duże utrudnienie.
+      </p>
+      <p class="about-text">
+        <span class="about-subtitle">Wdzięczność społeczności niepełnosprawnych</span>
+        Najbardziej wzruszającym aspektem projektu jest reakcja użytkowników. Choć pierwotnie chodziło głównie o nostalgiczne wrażenia i przyjemność artystyczną, GameReader szybko okazał się mieć ogromne znaczenie społeczne, ułatwiając dostępność gier osobom z trudnościami w czytaniu lub śledzeniu napisów.
+      </p>
+    </div>
+
+    <div class="about-dev">dev &mdash; fifizkonopii</div>
+
+    <div class="about-links">
+      <a href="https://www.gamereader.pl" target="_blank" class="btn about-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="about-btn-icon"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Strona www
+      </a>
+      <a href="https://discord.com/invite/AuyrJdahfA" target="_blank" class="btn about-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor" class="about-btn-icon"><path d="M20.317 4.37a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.865-.608 1.25a18.7 18.7 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.74 19.74 0 003.66 4.37a.07.07 0 00-.032.028C.533 9.046-.32 13.58.099 18.058a.082.082 0 00.031.056c2.053 1.508 4.041 2.423 5.993 3.03a.078.078 0 00.084-.028c.462-.63.873-1.295 1.226-1.994a.076.076 0 00-.042-.106 13.04 13.04 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.291.074.074 0 01.078-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.079.01c.12.099.245.198.373.29a.077.077 0 01-.007.128c-.598.343-1.22.645-1.873.893a.076.076 0 00-.04.106c.36.698.772 1.363 1.225 1.993a.076.076 0 00.084.028c1.961-.607 3.95-1.522 6.002-3.03a.077.077 0 00.031-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.029zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        Discord
+      </a>
+      <a href="https://www.youtube.com/@GameReader-Lektor" target="_blank" class="btn about-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor" class="about-btn-icon"><path d="M21.543 6.498C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022zM10 15.5l6-3.5-6-3.5v7z"/></svg>
+        YouTube
+      </a>
+      <a href="https://buycoffee.to/gamereader/" target="_blank" class="btn about-btn about-btn-coffee">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="about-btn-icon"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+        Postaw kawę
+      </a>
+    </div>
+
+    <div class="about-email">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="about-email-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      gamereader.pl@gmail.com
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+</body></html>
