@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameReader</title>
+  <link rel="stylesheet" href="/app.css?v=14">
+  <script>(function(){try{var t=localStorage.getItem('gr-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+  <style>
+    body { background: var(--bg); overflow: hidden; display: block !important; }
+    .wrap { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 14px; box-sizing: border-box; overflow: hidden; text-align: center; }
+    .lc-close { position: fixed; top: 8px; right: 10px; width: 32px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--line); color: var(--tx); font-size: 12px; cursor: pointer; border-radius: var(--r-sm); transition: var(--tf); box-shadow: var(--shadow-sm); z-index: 10; }
+    .lc-close:hover { color: #fff; background: var(--err); border-color: var(--err); box-shadow: var(--shadow-md); }
+    .lc-brand { display: flex; align-items: center; justify-content: center; margin: 16px auto 24px; }
+    .lc-brand img { width: 120px; height: 120px; object-fit: contain; border-radius: var(--r); filter: drop-shadow(0 8px 24px var(--p-glow2)); transition: transform .4s ease; }
+    .lc-brand img:hover { transform: translateY(-4px); }
+    .lc-title { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.6px; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; text-align: center; width: 100%; max-width: 100%; }
+    .list { flex: 1; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 6px; overflow-y: auto; min-height: 80px; box-shadow: var(--shadow-lg); width: 100%; max-width: 100%; }
+    .preset { padding: 10px 14px; border-radius: var(--r); cursor: pointer; font-weight: 700; font-size: 11px; transition: var(--tf); border-left: 3px solid transparent; margin-bottom: 2px; }
+    .preset:hover { background: var(--surface2); border-left-color: var(--p); box-shadow: var(--shadow-sm); }
+    .preset.selected { background: var(--p-glow2); color: var(--a); border-left-color: var(--a); box-shadow: var(--shadow-md); }
+    .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--tx2); text-align: center; padding: 20px 10px; font-weight: 500; font-size: 11px; }
+    .empty-icon { margin-bottom: 12px; opacity: 0.6; }
+    .meta { margin: 8px 6px 10px; font-size: 9px; color: var(--tx2); line-height: 1.4; width: 100%; max-width: 100%; text-align: center; }
+    .meta span { color: var(--tx); font-weight: 600; }
+    .actions { display: flex; gap: 6px; margin-bottom: 8px; width: 100%; max-width: 100%; }
+    .actions .btn { flex: 1; padding: 8px 10px; font-size: 10px; }
+    .actions .btn.primary { background: var(--gradient); border-color: transparent; color: #fff; box-shadow: var(--shadow-md); }
+    .actions .btn.primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    @media (prefers-reduced-motion: reduce) {
+      .lc-brand img, .actions .btn.primary { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <button type="button" id="close" class="lc-close" title="Zamknij"><svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div class="wrap">
+    <div class="lc-brand">
+      <img src="/logo.png" alt="GameReader" />
+    </div>
+    <div class="lc-title">Ostatnio uzywane presety</div>
+    <div id="list" class="list"></div>
+    <div class="meta">
+      <div>Sciezka: <span id="path">-</span></div>
+      <div>Ostatnio: <span id="date">-</span></div>
+    </div>
+    <div class="actions">
+      <button type="button" id="create" class="btn">Utworz</button>
+      <button type="button" id="load" class="btn primary">Wczytaj</button>
+      <button type="button" id="delete" class="btn">Usun</button>
+      <button type="button" id="clear" class="btn">Wyczysc</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { invoke } from "@tauri-apps/api/core";
+
+    const listEl = document.getElementById('list');
+    const pathEl = document.getElementById('path');
+    const dateEl = document.getElementById('date');
+
+    let presets = [];
+    let selected = null;
+
+    function renderMeta() {
+      pathEl.textContent = selected ? selected.path : '-';
+      dateEl.textContent = selected && selected.timestamp
+        ? new Date(selected.timestamp * 1000).toLocaleString('pl-PL')
+        : '-';
+    }
+
+    function renderList() {
+      listEl.innerHTML = '';
+      if (!presets.length) {
+        const e = document.createElement('div');
+        e.className = 'empty';
+        e.innerHTML = `
+          <svg class="empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          <span>Brak ostatnich presetow</span>
+        `;
+        listEl.appendChild(e);
+        return;
+      }
+      presets.forEach((p) => {
+        const item = document.createElement('div');
+        item.className = 'preset' + (selected && selected.path === p.path ? ' selected' : '');
+        item.textContent = p.name;
+        item.addEventListener('click', () => { selected = p; renderList(); renderMeta(); });
+        item.addEventListener('dblclick', doLoad);
+        listEl.appendChild(item);
+      });
+    }
+
+    async function refresh() {
+      for (let i = 0; i < 2; i++) {
+        try {
+          presets = await invoke('get_recent_presets');
+          if (presets.length) break;
+        } catch (e) {
+          presets = [];
+        }
+        if (i === 0) await new Promise(r => setTimeout(r, 500));
+      }
+      if (!selected || !presets.find((p) => p.path === selected.path)) {
+        selected = presets[0] || null;
+      }
+      renderList();
+      renderMeta();
+    }
+
+    async function finish(loadPath) {
+      try {
+        if (loadPath) await invoke('load_preset', { path: loadPath });
+      } catch (e) { console.error('load_preset failed', e); }
+      try { await invoke('finish_launch'); } catch (e) { console.error('finish_launch failed', e); }
+    }
+
+    async function doLoad() {
+      if (!selected) return;
+      finish(selected.path);
+    }
+
+    document.getElementById('close').addEventListener('click', () => finish(null));
+    document.getElementById('load').addEventListener('click', doLoad);
+
+    document.getElementById('create').addEventListener('click', () => {
+      finish(null);
+    });
+
+    document.getElementById('delete').addEventListener('click', async () => {
+      if (!selected) return;
+      try {
+        await invoke('remove_recent_preset', { path: selected.path });
+        await refresh();
+      } catch (e) { console.error('delete failed', e); }
+    });
+
+    document.getElementById('clear').addEventListener('click', async () => {
+      try {
+        await invoke('clear_recent_presets');
+        await refresh();
+      } catch (e) { console.error('clear failed', e); }
+    });
+
+    refresh();
+  </script>
+</body>
+</html>

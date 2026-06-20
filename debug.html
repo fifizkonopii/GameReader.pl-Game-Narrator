@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameReader - Konsola debug</title>
+  <link rel="stylesheet" href="/app.css?v=14">
+  <script>(function(){try{var t=localStorage.getItem("gr-theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <style>
+    body { background: var(--bg); display: flex; flex-direction: column; height: 100vh; display: block !important; }
+    .dbg-wrap { display: flex; flex-direction: column; height: 100vh; }
+    .dbg-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 14px 20px; background: var(--surface); border-bottom: 1px solid var(--line);
+      flex-wrap: wrap; box-shadow: var(--shadow-md);
+    }
+    .dbg-header h1 {
+      font-size: 16px; font-weight: 900; letter-spacing: -.3px;
+      background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .dbg-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .dbg-status {
+      font-size: 10px; font-weight: 800; color: var(--a); background: var(--a-glow);
+      padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(255,206,58,.3);
+      box-shadow: var(--shadow-sm); text-transform: uppercase; letter-spacing: .5px;
+    }
+    .log-container {
+      flex: 1; overflow-y: auto; padding: 16px 20px;
+      background: var(--bg);
+    }
+    .log-entry {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 10px 14px; margin-bottom: 6px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+    }
+    .log-entry:hover { background: var(--surface2); }
+    .log-level {
+      flex-shrink: 0; font-weight: 800; min-width: 52px;
+      font-size: 10px; text-transform: uppercase; letter-spacing: .5px;
+      padding: 4px 10px; border-radius: 8px; text-align: center;
+      font-family: var(--font);
+    }
+    .log-level.INFO { color: var(--ok); background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.2); }
+    .log-level.WARN { color: var(--warn); background: rgba(255,206,58,.1); border: 1px solid rgba(255,206,58,.2); }
+    .log-level.ERROR { color: var(--err); background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.2); }
+    .log-level.DEBUG { color: var(--p2); background: var(--p-glow2); border: 1px solid rgba(129,106,254,.2); }
+    .log-level.TRACE { color: var(--tx3); background: rgba(96,92,121,.1); border: 1px solid rgba(96,92,121,.2); }
+    .log-message {
+      color: var(--tx); flex: 1; word-break: break-word;
+      font-size: 12px; font-weight: 500; line-height: 1.5;
+      padding-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dbg-wrap">
+    <div class="dbg-header" data-tauri-drag-region>
+      <h1 data-tauri-drag-region><img src="/name.png" alt="GameReader" class="dbg-title-img" /> - Konsola debug</h1>
+      <div class="dbg-controls">
+        <span class="dbg-status" id="status">Listening...</span>
+        <button class="btn" id="mode-btn">Tryb: Prosty</button>
+        <button class="btn" id="clear-btn">Wyczysc</button>
+        <button class="btn" id="save-btn">Zapisz</button>
+        <button class="btn" id="auto-scroll-btn">Auto-scroll: ON</button>
+        <button class="btn" id="min-btn">-</button>
+        <button class="btn" id="close-btn">Zamknij</button>
+      </div>
+    </div>
+    <div class="log-container" id="log-container">
+      <div class="log-entry"><span class="log-level INFO">INFO</span><span class="log-message">Konsola debug uruchomiona. Czekam na logi...</span></div>
+    </div>
+  </div>
+  <script>
+    const invoke = window.__TAURI__.core.invoke;
+    const listen = window.__TAURI__.event.listen;
+    listen("theme_changed", (e) => { try { document.documentElement.setAttribute("data-theme", e.payload); localStorage.setItem("gr-theme", e.payload); } catch (_) {} });
+    const dialog = window.__TAURI__.dialog;
+
+    let autoScroll = true;
+    const maxLogs = 2000;
+    let mode = 'simple';
+    const simpleLines = [];
+    const techLines = [];
+
+    const logContainer = document.getElementById('log-container');
+    const clearBtn = document.getElementById('clear-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const closeBtn = document.getElementById('close-btn');
+    const modeBtn = document.getElementById('mode-btn');
+    const autoScrollBtn = document.getElementById('auto-scroll-btn');
+    const statusEl = document.getElementById('status');
+
+    async function closeConsole() {
+      try { await invoke('close_debug_console'); } catch (e) { console.error('close_debug_console failed:', e); }
+    }
+    closeBtn.addEventListener('click', closeConsole);
+    document.getElementById('min-btn')?.addEventListener('click', () => {
+      try { window.__TAURI__.window.getCurrentWindow().minimize(); } catch (e) { console.error(e); }
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConsole(); });
+
+    autoScrollBtn.addEventListener('click', () => {
+      autoScroll = !autoScroll;
+      autoScrollBtn.textContent = 'Auto-scroll: ' + (autoScroll ? 'ON' : 'OFF');
+      if (autoScroll) scrollToBottom();
+    });
+
+    modeBtn.addEventListener('click', () => {
+      mode = mode === 'simple' ? 'tech' : 'simple';
+      modeBtn.textContent = 'Tryb: ' + (mode === 'simple' ? 'Prosty' : 'Techniczny');
+      renderAll();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      simpleLines.length = 0; techLines.length = 0; renderAll();
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      try {
+        const now = new Date();
+        const stamp = now.toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        const defaultName = 'gamereader-log-' + stamp + '.txt';
+        let path = null;
+        if (dialog && dialog.save) {
+          path = await dialog.save({ title: 'Zapisz logi', defaultPath: defaultName, filters: [{ name: 'Plik tekstowy', extensions: ['txt'] }] });
+        } else { path = defaultName; }
+        if (!path) return;
+        const saved = await invoke('export_logs', { path });
+        statusEl.textContent = 'Zapisano: ' + (saved || path);
+      } catch (e) { statusEl.textContent = 'Blad zapisu: ' + e; }
+    });
+
+    function detectLevel(line) {
+      if (line.includes('\u274c')) return 'ERROR';
+      if (line.includes('\u26a0')) return 'WARN';
+      if (/\bERROR\b/.test(line)) return 'ERROR';
+      if (/\bWARN\b/.test(line)) return 'WARN';
+      if (/\bDEBUG\b/.test(line)) return 'DEBUG';
+      if (/\bTRACE\b/.test(line)) return 'TRACE';
+      return 'INFO';
+    }
+
+    function makeEntry(line) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      const level = detectLevel(line);
+      const lv = document.createElement('span');
+      lv.className = 'log-level ' + level;
+      lv.textContent = level;
+      const msg = document.createElement('span');
+      msg.className = 'log-message';
+      msg.textContent = line;
+      entry.appendChild(lv); entry.appendChild(msg);
+      return entry;
+    }
+
+    function appendVisible(line) {
+      logContainer.appendChild(makeEntry(line));
+      const excess = logContainer.childElementCount - maxLogs;
+      if (excess > 0) {
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < excess; i++) frag.appendChild(logContainer.firstChild);
+      }
+      if (autoScroll) scrollToBottom();
+      statusEl.textContent = logContainer.childElementCount + ' linii';
+    }
+
+    function renderAll() {
+      const lines = mode === 'simple' ? simpleLines : techLines;
+      logContainer.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      lines.forEach((l) => frag.appendChild(makeEntry(l)));
+      logContainer.appendChild(frag);
+      if (autoScroll) scrollToBottom();
+      statusEl.textContent = lines.length + ' linii';
+    }
+
+    function pushLine(buffer, line) { buffer.push(line); if (buffer.length > maxLogs) buffer.shift(); }
+    function scrollToBottom() { logContainer.scrollTop = logContainer.scrollHeight; }
+
+    listen('user_log', (event) => { pushLine(simpleLines, event.payload); if (mode === 'simple') appendVisible(event.payload); });
+    listen('log_line', (event) => { pushLine(techLines, event.payload); if (mode === 'tech') appendVisible(event.payload); });
+
+    async function loadHistory() {
+      try {
+        const [simple, tech] = await Promise.all([ invoke('get_recent_user_logs'), invoke('get_recent_logs') ]);
+        simpleLines.length = 0; techLines.length = 0;
+        if (Array.isArray(simple)) simple.forEach((l) => pushLine(simpleLines, l));
+        if (Array.isArray(tech)) tech.forEach((l) => pushLine(techLines, l));
+        renderAll();
+      } catch (e) {
+        simpleLines.length = 0; pushLine(simpleLines, 'Nie udalo sie wczytac historii logow: ' + e); renderAll();
+      }
+    }
+
+    listen('debug_show', loadHistory);
+    loadHistory();
+  </script>
+</body>
+</html>
